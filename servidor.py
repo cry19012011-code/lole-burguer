@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 """
-Lole Burger — Servidor combinado HTTP + WebSocket
-Sirve los archivos HTML y maneja pedidos en tiempo real.
+Lole Burger — Servidor unificado HTTP + WebSocket en un solo puerto
 """
-
 import asyncio
 import json
 import os
 import datetime
 import websockets
+from websockets.server import serve
 from http.server import SimpleHTTPRequestHandler
-import socketserver
-import threading
+import io
 
 PORT = int(os.environ.get("PORT", 8765))
 
@@ -19,18 +17,8 @@ clientes = set()
 cocinas  = set()
 contador_pedido = 0
 
-# ── Servidor HTTP para los archivos HTML ──────────────────────────
-class Handler(SimpleHTTPRequestHandler):
-    def log_message(self, format, *args):
-        pass  # silenciar logs HTTP
-
-def iniciar_http():
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        httpd.serve_forever()
-
-# ── WebSocket ─────────────────────────────────────────────────────
-WS_PORT = PORT + 1 if PORT != 443 else 8766
+def now():
+    return datetime.datetime.now().strftime("%H:%M:%S")
 
 async def handler(ws):
     global contador_pedido
@@ -47,11 +35,11 @@ async def handler(ws):
                 tipo = msg.get("tipo")
                 if tipo == "cocina":
                     cocinas.add(ws)
-                    print(f"[{now()}] Cocina conectada ({len(cocinas)} activa/s)")
+                    print(f"[{now()}] Cocina conectada ({len(cocinas)})")
                     await ws.send(json.dumps({"accion": "bienvenida"}))
                 else:
                     clientes.add(ws)
-                    print(f"[{now()}] Cliente conectado ({len(clientes)} activo/s)")
+                    print(f"[{now()}] Cliente conectado ({len(clientes)})")
 
             elif accion == "pedido":
                 contador_pedido += 1
@@ -65,7 +53,7 @@ async def handler(ws):
                     "items":  msg.get("items", []),
                     "total":  msg.get("total", 0),
                 }
-                print(f"[{now()}] Pedido #{numero:03d} — Gs. {pedido['total']:,}")
+                print(f"[{now()}] Pedido #{numero:03d}")
                 await ws.send(json.dumps({"accion": "confirmado", "numero": numero}))
                 muertos = set()
                 for cocina in cocinas:
@@ -92,16 +80,51 @@ async def handler(ws):
         clientes.discard(ws)
         cocinas.discard(ws)
 
-def now():
-    return datetime.datetime.now().strftime("%H:%M:%S")
+async def http_handler(path, request_headers):
+    """Sirve archivos estáticos para peticiones HTTP normales"""
+    # Solo responder a peticiones que no son WebSocket upgrade
+    return None  # dejar que websockets maneje el WS
+
+async def process_request(connection, request):
+    """Intercepta requests HTTP y sirve archivos"""
+    path = request.path.lstrip("/") or "menu.html"
+    # Quitar query strings
+    path = path.split("?")[0]
+
+    # Mapeo de extensiones a content-type
+    tipos = {
+        "html": "text/html; charset=utf-8",
+        "css":  "text/css",
+        "js":   "application/javascript",
+        "png":  "image/png",
+        "jpg":  "image/jpeg",
+        "ico":  "image/x-icon",
+    }
+    ext = path.rsplit(".", 1)[-1] if "." in path else "html"
+    content_type = tipos.get(ext, "text/plain")
+
+    base = os.path.dirname(os.path.abspath(__file__))
+    filepath = os.path.join(base, path)
+
+    if os.path.isfile(filepath):
+        with open(filepath, "rb") as f:
+            body = f.read()
+        from websockets.http11 import Response
+        headers = [
+            ("Content-Type", content_type),
+            ("Content-Length", str(len(body))),
+            ("Access-Control-Allow-Origin", "*"),
+        ]
+        return Response(200, "OK", headers, body)
+
+    # 404
+    from websockets.http11 import Response
+    body = b"Not found"
+    return Response(404, "Not Found", [("Content-Type","text/plain"),("Content-Length","9")], body)
 
 async def main():
-    print(f"Lole Burger arriba — HTTP:{PORT}  WS:{WS_PORT}")
-    # HTTP en hilo separado
-    t = threading.Thread(target=iniciar_http, daemon=True)
-    t.start()
-    # WebSocket
-    async with websockets.serve(handler, "0.0.0.0", WS_PORT):
+    print(f"Lole Burger corriendo en puerto {PORT}")
+    async with serve(handler, "0.0.0.0", PORT, process_request=process_request):
         await asyncio.Future()
 
 if __name__ == "__main__":
