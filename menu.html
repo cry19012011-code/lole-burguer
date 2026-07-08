@@ -486,8 +486,9 @@ body{font-family:'Inter',sans-serif;background:var(--crema);color:var(--texto);m
 </div>
 
 <script>
-const WS_IP   = "192.168.100.56"; // ← IP de tu PC
-const WS_PORT = 8765;
+const WS_IP = "web-production-4cb14e.up.railway.app";
+const WS_PORT = 443;
+const WS_PROTOCOL = "wss";
 
 const MENU = {
   burgers:[
@@ -536,36 +537,25 @@ function encontrar(id){
 }
 
 /* ── RENDER ITEMS ── */
+function htmlItem(it){
+  var badge = it.badge ? '<div class="item-badge">'+it.badge+'</div>' : '';
+  var foto = '<div class="item-foto"><img src="'+it.foto+'" alt="'+it.nombre+'" onerror="this.parentElement.innerHTML=\'<span style=&quot;font-size:2rem&quot;>'+it.emoji+'</span>\'" loading="lazy"/></div>';
+  var ctrl = renderCtrl(it.id);
+  var enCarrito = carrito[it.id] ? ' en-carrito' : '';
+  return '<div class="item-row'+enCarrito+'" id="row-'+it.id+'">'+badge+foto+'<div class="item-info"><div class="item-nombre">'+it.nombre+'</div><div class="item-desc">'+it.desc+'</div><div class="item-precio">'+fmt(it.precio)+'</div><div id="ctrl-'+it.id+'">'+ctrl+'</div></div></div>';
+}
+
 function renderCat(items,contenedorId){
-  const el=document.getElementById(contenedorId);
-  // Mantener aviso pizza si existe
-  const aviso=el.querySelector(".aviso-pizza");
-  const html=items.map(it=>`
-    <div class="item-row${carrito[it.id]?" en-carrito":""}" id="row-${it.id}">
-      ${it.badge?`<div class="item-badge">${it.badge}</div>`:""}
-      <div class="item-foto" id="foto-${it.id}">
-        <img src="${it.foto}" alt="${it.nombre}"
-          onerror="this.parentElement.innerHTML='<span style=\\"font-size:2rem\\">${it.emoji}</span>'"
-          loading="lazy"/>
-      </div>
-      <div class="item-info">
-        <div class="item-nombre">${it.nombre}</div>
-        <div class="item-desc">${it.desc}</div>
-        <div class="item-precio">${fmt(it.precio)}</div>
-        <div id="ctrl-${it.id}">${renderCtrl(it.id)}</div>
-      </div>
-    </div>`).join("");
+  var el=document.getElementById(contenedorId);
+  var aviso=el.querySelector(".aviso-pizza");
+  var html=items.map(function(it){return htmlItem(it);}).join("");
   el.innerHTML=(aviso?aviso.outerHTML:"")+html;
 }
 
 function renderCtrl(id){
-  const q=carrito[id]?.qty||0;
-  if(!q)return`<button class="btn-agregar" onclick="agregar('${id}')">＋ Agregar al pedido</button>`;
-  return`<div class="qty-ctrl">
-    <button class="qty-btn" onclick="cambiar('${id}',-1)">−</button>
-    <span class="qty-n">${q}</span>
-    <button class="qty-btn" onclick="cambiar('${id}',1)">＋</button>
-  </div>`;
+  var q=carrito[id]?carrito[id].qty:0;
+  if(!q)return '<button class="btn-agregar" onclick="agregar(\''+id+'\')">+ Agregar al pedido</button>';
+  return '<div class="qty-ctrl"><button class="qty-btn" onclick="cambiar(\''+id+'\',-1)">-</button><span class="qty-n">'+q+'</span><button class="qty-btn" onclick="cambiar(\''+id+'\',1)">+</button></div>';
 }
 
 function agregar(id){
@@ -603,27 +593,16 @@ function renderResumen(){
   }
   vacio.style.display="none";items.style.display="";form.style.display="";
   const total=ent.reduce((s,e)=>s+e.item.precio*e.qty,0);
-  items.innerHTML=ent.map(e=>`
-    <div class="res-fila">
-      <div class="res-ctrl">
-        <button class="res-qbtn" onclick="cambiar('${e.item.id}',-1)">−</button>
-        <span class="res-qn">${e.qty}</span>
-        <button class="res-qbtn" onclick="cambiar('${e.item.id}',1)">+</button>
-      </div>
-      <span class="res-nombre">${e.item.nombre}</span>
-      <span class="res-precio">${fmt(e.item.precio*e.qty)}</span>
-    </div>`).join("")+`
-    <div class="res-fila">
-      <span></span>
-      <span class="res-nombre" style="font-weight:700">Total</span>
-      <span class="res-total">${fmt(total)}</span>
-    </div>`;
+  var filas=ent.map(function(e){
+    return '<div class="res-fila"><div class="res-ctrl"><button class="res-qbtn" onclick="cambiar(\''+e.item.id+'\',-1)">-</button><span class="res-qn">'+e.qty+'</span><button class="res-qbtn" onclick="cambiar(\''+e.item.id+'\',1)">+</button></div><span class="res-nombre">'+e.item.nombre+'</span><span class="res-precio">'+fmt(e.item.precio*e.qty)+'</span></div>';
+  }).join("");
+  items.innerHTML=filas+'<div class="res-fila"><span></span><span class="res-nombre" style="font-weight:700">Total</span><span class="res-total">'+fmt(total)+'</span></div>';
 }
 
 /* ── WEBSOCKET ── */
 function conectarWS(){
   try{
-    ws=new WebSocket(`ws://${WS_IP}:${WS_PORT}`);
+    ws = new WebSocket(`wss://${WS_IP}`);
     ws.onopen=()=>{wsOk=true;ws.send(JSON.stringify({accion:"registrar",tipo:"menu"}));setDot(true)};
     ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.accion==="confirmado")mostrarConfirmacion(m.numero)};
     ws.onclose=()=>{wsOk=false;setDot(false);setTimeout(conectarWS,3000)};
@@ -703,24 +682,7 @@ function mostrarToast(msg){
 
 /* ── INIT ── */
 renderCat(MENU.burgers,"cat-burgers");
-// Para pizzas, renderizamos dentro del div pero mantenemos el aviso
-const pizzaContainer=document.getElementById("cat-pizzas");
-const avisoPizza=pizzaContainer.querySelector(".aviso-pizza").outerHTML;
-pizzaContainer.innerHTML=avisoPizza+MENU.pizzas.map(it=>`
-  <div class="item-row${carrito[it.id]?" en-carrito":""}" id="row-${it.id}">
-    ${it.badge?`<div class="item-badge">${it.badge}</div>`:""}
-    <div class="item-foto" id="foto-${it.id}">
-      <img src="${it.foto}" alt="${it.nombre}"
-        onerror="this.parentElement.innerHTML='<span style=\\"font-size:2rem\\">${it.emoji}</span>'"
-        loading="lazy"/>
-    </div>
-    <div class="item-info">
-      <div class="item-nombre">${it.nombre}</div>
-      <div class="item-desc">${it.desc}</div>
-      <div class="item-precio">${fmt(it.precio)}</div>
-      <div id="ctrl-${it.id}">${renderCtrl(it.id)}</div>
-    </div>
-  </div>`).join("");
+renderCat(MENU.pizzas,"cat-pizzas");
 renderCat(MENU.lomito,"cat-lomito");
 renderCat(MENU.arabe,"cat-arabe");
 renderCat(MENU.papas,"cat-papas");

@@ -220,8 +220,9 @@ header{
    que corre servidor.py:
    const WS_IP = "192.168.1.XXX";
    ════════════════════════════════════════════════ */
-const WS_IP   = "192.168.100.56";
-const WS_PORT = 8765;
+const WS_IP = "web-production-4cb14e.up.railway.app";
+const WS_PORT = 443;
+const WS_PROTOCOL = "wss";
 
 let ws = null;
 let contPend = 0, contListos = 0, contTotal = 0;
@@ -239,7 +240,7 @@ setInterval(tickReloj,1000); tickReloj();
 /* ═══ WEBSOCKET ══════════════════════════════════ */
 function conectar(){
   try{
-    ws = new WebSocket(`ws://${WS_IP}:${WS_PORT}`);
+    ws = new WebSocket(`wss://${WS_IP}`);
     ws.onopen = ()=>{
       ws.send(JSON.stringify({accion:"registrar",tipo:"cocina"}));
       setDot(true);
