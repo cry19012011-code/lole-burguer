@@ -602,7 +602,7 @@ function renderResumen(){
 /* ── WEBSOCKET ── */
 function conectarWS(){
   try{
-    ws = new WebSocket(`wss://${WS_IP}`);
+    ws = new WebSocket(`wss://${WS_IP}:8766`);
     ws.onopen=()=>{wsOk=true;ws.send(JSON.stringify({accion:"registrar",tipo:"menu"}));setDot(true)};
     ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.accion==="confirmado")mostrarConfirmacion(m.numero)};
     ws.onclose=()=>{wsOk=false;setDot(false);setTimeout(conectarWS,3000)};

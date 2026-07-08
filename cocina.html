@@ -240,7 +240,7 @@ setInterval(tickReloj,1000); tickReloj();
 /* ═══ WEBSOCKET ══════════════════════════════════ */
 function conectar(){
   try{
-    ws = new WebSocket(`wss://${WS_IP}`);
+    ws = new WebSocket(`wss://${WS_IP}:8766`);
     ws.onopen = ()=>{
       ws.send(JSON.stringify({accion:"registrar",tipo:"cocina"}));
       setDot(true);
