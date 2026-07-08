@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Lole Burger — Menú</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --naranja:#e85d00;
+  --naranja2:#ff7520;
+  --negro:#0d0a07;
+  --crema:#fdf6ee;
+  --crema2:#f0e6d6;
+  --texto:#1a1510;
+  --muted:#8a7a6a;
+  --borde:#e8d8c4;
+  --verde:#16a34a;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--crema);color:var(--texto);min-height:100vh;font-size:16px}
+
+/* HERO */
+.hero{
+  background:var(--negro);
+  min-height:180px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:2rem 1rem 1.5rem;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(232,93,0,0.25),transparent 70%);
+}
+.hero-logo{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;color:#fff;letter-spacing:2px;position:relative}
+.hero-logo span{color:var(--naranja)}
+.hero-tel{color:#e8a97a;font-size:1rem;margin-top:0.3rem;position:relative}
+.hero-badge{
+  margin-top:0.75rem;position:relative;
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--naranja);color:#fff;
+  font-size:13px;font-weight:700;padding:6px 16px;border-radius:20px;
+}
+
+/* NAVEGACIÓN POR CATEGORÍA — botones grandes con emoji */
+.cats-wrap{
+  background:#fff;
+  border-bottom:2px solid var(--borde);
+  padding:0.75rem 1rem;
+  position:sticky;top:0;z-index:50;
+}
+.cats{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.cats::-webkit-scrollbar{display:none}
+.cat-btn{
+  flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:10px 16px;
+  border-radius:12px;
+  border:2px solid var(--borde);
+  background:#fff;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+  transition:all 0.15s;
+  min-width:72px;
+}
+.cat-btn:active{transform:scale(0.96)}
+.cat-btn.activa{background:var(--naranja);border-color:var(--naranja);color:#fff}
+.cat-btn.activa .cat-emoji{filter:none}
+.cat-emoji{font-size:1.6rem;line-height:1}
+.cat-nombre{font-size:11px;font-weight:600;color:var(--texto);white-space:nowrap}
+.cat-btn.activa .cat-nombre{color:#fff}
+
+/* CONTENIDO PRINCIPAL */
+.main{max-width:600px;margin:0 auto;padding:1.25rem 1rem 7rem}
+
+/* AVISO PIZZA */
+.aviso-pizza{
+  background:#fffbe6;border:2px solid #ffe58f;
+  border-radius:14px;padding:14px 16px;
+  font-size:15px;line-height:1.7;color:#5a4a2a;
+  margin-bottom:1.25rem;
+}
+
+/* LISTA DE ITEMS — 1 columna, filas grandes y legibles */
+.item-lista{display:flex;flex-direction:column;gap:12px}
+
+.item-row{
+  background:#fff;
+  border:2px solid var(--borde);
+  border-radius:16px;
+  display:flex;align-items:center;
+  gap:14px;
+  padding:14px;
+  transition:border-color 0.15s;
+  position:relative;
+}
+.item-row.en-carrito{border-color:var(--naranja)}
+
+/* FOTO del item */
+.item-foto{
+  width:80px;height:80px;flex-shrink:0;
+  border-radius:10px;overflow:hidden;
+  background:var(--crema2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;
+}
+.item-foto img{width:100%;height:100%;object-fit:cover;display:block}
+
+.item-info{flex:1;min-width:0}
+.item-nombre{font-size:1.05rem;font-weight:700;margin-bottom:3px;line-height:1.2}
+.item-desc{font-size:0.85rem;color:var(--muted);line-height:1.45;margin-bottom:8px}
+.item-precio{font-size:1.1rem;font-weight:700;color:var(--naranja)}
+
+.item-badge{
+  position:absolute;top:10px;right:10px;
+  background:var(--naranja);color:#fff;
+  font-size:11px;font-weight:700;
+  padding:3px 9px;border-radius:20px;
+}
+
+/* BOTÓN AGREGAR — grande y con texto */
+.btn-agregar{
+  margin-top:8px;
+  width:100%;
+  padding:11px;
+  background:var(--naranja);color:#fff;
+  border:none;border-radius:10px;
+  font-family:'Inter',sans-serif;font-size:0.95rem;font-weight:700;
+  cursor:pointer;transition:all 0.15s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-agregar:active{transform:scale(0.97)}
+.btn-agregar:hover{background:var(--naranja2)}
+
+/* CONTROL CANTIDAD */
+.qty-ctrl{
+  margin-top:8px;
+  display:flex;align-items:center;gap:0;
+  background:var(--crema2);border-radius:10px;overflow:hidden;
+  border:2px solid var(--borde);
+}
+.qty-btn{
+  width:48px;height:44px;
+  border:none;background:transparent;
+  font-size:1.4rem;font-weight:700;
+  cursor:pointer;color:var(--texto);
+  font-family:'Inter',sans-serif;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.1s;flex-shrink:0;
+}
+.qty-btn:active{background:var(--borde)}
+.qty-n{
+  flex:1;text-align:center;
+  font-size:1.1rem;font-weight:700;
+  color:var(--texto);
+}
+
+/* ── TAB HISTORIA ── */
+.historia-texto{
+  font-size:1rem;line-height:1.8;color:var(--texto);
+  margin-top:1rem;margin-bottom:1.5rem;
+}
+.historia-texto strong{color:var(--naranja)}
+.fotos-hist{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:1.5rem 0}
+.foto-h{border-radius:14px;overflow:hidden;background:var(--crema2);border:2px dashed var(--borde);position:relative;aspect-ratio:1}
+.foto-h:first-child{grid-column:1/-1;aspect-ratio:16/7}
+.foto-h img{width:100%;height:100%;object-fit:cover;display:block}
+.foto-h-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:13px;text-align:center;padding:12px}
+.foto-h-ph span{font-size:2rem}
+.foto-h-label{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));color:#fff;font-size:13px;font-weight:600;padding:20px 12px 10px}
+.valores{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:1rem}
+.val{background:#fff;border:2px solid var(--borde);border-radius:14px;padding:1rem;text-align:center}
+.val-ico{font-size:1.8rem;margin-bottom:6px}
+.val-titulo{font-size:0.9rem;font-weight:700;margin-bottom:4px}
+.val-txt{font-size:0.82rem;color:var(--muted);line-height:1.5}
+
+/* ── TAB CARRITO ── */
+.carrito-vacio{text-align:center;padding:3rem 1rem;color:var(--muted)}
+.carrito-vacio .ico{font-size:3.5rem;margin-bottom:1rem}
+.carrito-vacio p{font-size:1rem;line-height:1.6;margin-bottom:1.5rem}
+
+.btn-ir-menu{
+  padding:14px 28px;background:var(--naranja);color:#fff;
+  border:none;border-radius:12px;
+  font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;
+  cursor:pointer;
+}
+
+.resumen-card{
+  background:#fff;border:2px solid var(--borde);
+  border-radius:16px;overflow:hidden;margin-bottom:1rem;
+}
+.res-fila{
+  display:flex;align-items:center;
+  padding:14px 16px;border-bottom:1px solid var(--borde);
+  gap:10px;
+}
+.res-fila:last-child{border-bottom:none;background:var(--crema2)}
+.res-nombre{flex:1;font-size:1rem;font-weight:600}
+.res-precio{font-size:1rem;font-weight:700;color:var(--naranja);min-width:90px;text-align:right}
+.res-ctrl{display:flex;align-items:center;gap:0;background:var(--crema2);border-radius:8px;border:1.5px solid var(--borde)}
+.res-qbtn{width:38px;height:36px;border:none;background:transparent;font-size:1.2rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center}
+.res-qn{font-size:1rem;font-weight:700;min-width:24px;text-align:center}
+.res-total{font-size:1.1rem;font-weight:700;color:var(--naranja)}
+
+.campo-grupo{margin-bottom:1rem}
+.campo-grupo label{
+  font-size:1rem;font-weight:700;display:block;
+  margin-bottom:8px;color:var(--texto);
+}
+.campo-grupo input,
+.campo-grupo textarea{
+  width:100%;padding:14px;
+  border:2px solid var(--borde);border-radius:12px;
+  font-family:'Inter',sans-serif;font-size:1rem;
+  background:#fff;color:var(--texto);
+  outline:none;transition:border-color 0.15s;
+}
+.campo-grupo input:focus,
+.campo-grupo textarea:focus{border-color:var(--naranja)}
+.campo-grupo textarea{resize:none;height:80px}
+
+.btn-pedir{
+  width:100%;padding:18px;
+  background:var(--naranja);color:#fff;
+  border:none;border-radius:14px;
+  font-family:'Inter',sans-serif;font-size:1.1rem;font-weight:700;
+  cursor:pointer;transition:all 0.15s;
+  letter-spacing:0.02em;
+}
+.btn-pedir:active{transform:scale(0.98)}
+.btn-pedir:disabled{background:#ccc;cursor:not-allowed}
+
+/* CONFIRMACIÓN */
+.confirma-box{
+  display:none;text-align:center;
+  padding:2.5rem 1rem;
+  background:#fff;border:2px solid var(--borde);
+  border-radius:16px;margin-bottom:1rem;
+}
+.confirma-box.visible{display:block}
+.confirma-check{font-size:4rem;margin-bottom:0.5rem}
+.confirma-titulo{font-size:1.4rem;font-weight:700;color:var(--verde);margin-bottom:0.5rem}
+.confirma-num{font-family:'Bebas Neue',sans-serif;font-size:5rem;color:var(--naranja);line-height:1}
+.confirma-txt{font-size:1rem;color:var(--muted);margin-top:0.5rem;line-height:1.6}
+.btn-nuevo{
+  margin-top:1.5rem;padding:14px 28px;
+  background:var(--naranja);color:#fff;
+  border:none;border-radius:12px;
+  font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;
+  cursor:pointer;
+}
+
+/* BARRA FLOTANTE */
+.barra{
+  position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);
+  width:calc(100% - 2rem);max-width:560px;
+  background:var(--negro);border-radius:16px;
+  padding:1rem 1.25rem;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 8px 32px rgba(0,0,0,0.35);
+  z-index:100;transition:opacity 0.2s,transform 0.2s;
+}
+.barra.oculta{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(14px)}
+.barra-info{color:#fff}
+.barra-count{font-size:13px;color:#e8a97a;margin-bottom:2px}
+.barra-total{font-size:1.15rem;font-weight:700}
+.barra-btn{
+  background:var(--naranja);color:#fff;
+  border:none;padding:12px 22px;border-radius:12px;
+  font-family:'Inter',sans-serif;font-size:0.95rem;font-weight:700;
+  cursor:pointer;transition:background 0.15s;
+  white-space:nowrap;
+}
+.barra-btn:hover{background:var(--naranja2)}
+
+/* ESTADO WS (oculto para el usuario, solo puntito) */
+.ws-pill{
+  display:flex;align-items:center;gap:6px;
+  font-size:13px;color:var(--muted);margin-bottom:1rem;
+  margin-top:1rem;
+}
+.ws-dot{width:10px;height:10px;border-radius:50%;background:#ccc;flex-shrink:0}
+.ws-dot.ok{background:var(--verde)}
+.ws-dot.err{background:#ef4444}
+
+/* TOAST */
+.toast{
+  position:fixed;top:80px;left:50%;transform:translateX(-50%);
+  background:var(--negro);color:#fff;
+  padding:14px 28px;border-radius:30px;
+  font-size:1rem;font-weight:600;
+  box-shadow:0 8px 24px rgba(0,0,0,0.3);
+  z-index:200;opacity:0;transition:opacity 0.3s;
+  pointer-events:none;white-space:nowrap;
+}
+.toast.visible{opacity:1}
+
+/* TABS */
+.tabs-nav{
+  background:var(--negro);
+  display:flex;border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.tab-nav-btn{
+  flex:1;padding:16px 8px;
+  border:none;background:transparent;
+  color:rgba(255,255,255,0.45);
+  font-family:'Inter',sans-serif;font-size:0.95rem;font-weight:600;
+  cursor:pointer;border-bottom:3px solid transparent;
+  transition:all 0.15s;
+}
+.tab-nav-btn.activa{color:#fff;border-bottom-color:var(--naranja)}
+
+.seccion{display:none}
+.seccion.activa{display:block}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-logo">Lole<span>Burger</span></div>
+  <div class="hero-tel">📞 971 863 067 &nbsp;·&nbsp; 🛵 Delivery disponible</div>
+</div>
+
+<!-- TABS PRINCIPALES -->
+<div class="tabs-nav">
+  <button class="tab-nav-btn activa" onclick="irTab('menu')">🍔 Menú</button>
+  <button class="tab-nav-btn" onclick="irTab('historia')">❤️ Nuestra historia</button>
+  <button class="tab-nav-btn" onclick="irTab('carrito')">🛒 Mi pedido</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════ TAB MENÚ ══════════════ -->
+<div id="tab-menu" class="seccion activa">
+
+  <!-- CATEGORÍAS -->
+  <div class="cats-wrap">
+    <div class="cats">
+      <button class="cat-btn activa" onclick="irCat('burgers',this)">
+        <span class="cat-emoji">🍔</span>
+        <span class="cat-nombre">Hamburguesas</span>
+      </button>
+      <button class="cat-btn" onclick="irCat('pizzas',this)">
+        <span class="cat-emoji">🍕</span>
+        <span class="cat-nombre">Pizzas</span>
+      </button>
+      <button class="cat-btn" onclick="irCat('lomito',this)">
+        <span class="cat-emoji">🥖</span>
+        <span class="cat-nombre">Lomito</span>
+      </button>
+      <button class="cat-btn" onclick="irCat('arabe',this)">
+        <span class="cat-emoji">🌯</span>
+        <span class="cat-nombre">Árabe</span>
+      </button>
+      <button class="cat-btn" onclick="irCat('papas',this)">
+        <span class="cat-emoji">🍟</span>
+        <span class="cat-nombre">Papas</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div id="cat-burgers" class="item-lista"></div>
+
+    <div id="cat-pizzas" class="item-lista" style="display:none">
+      <div class="aviso-pizza">
+        🧀 <strong>Todas las pizzas llevan catupiry</strong><br>
+        ➕ Borde relleno de muzzarela: <strong>+10.000 Gs</strong><br>
+        🧄 Aderezos: <strong>1.000 Gs c/u</strong>
+      </div>
+    </div>
+
+    <div id="cat-lomito" class="item-lista" style="display:none"></div>
+    <div id="cat-arabe" class="item-lista" style="display:none"></div>
+    <div id="cat-papas" class="item-lista" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB HISTORIA ══════════════ -->
+<div id="tab-historia" class="seccion">
+  <div class="main">
+    <p class="historia-texto">
+      <strong>Lole Burger</strong> nació en Ñemby con una idea simple: hacer la comida que siempre quisimos comer. Sin atajos, sin congelados y sin apuro.<br><br>
+      Empezamos de a poco, con mucha ilusión y el apoyo de los vecinos del barrio de Santa Librada. Hoy seguimos cocinando con el mismo amor del primer día.
+    </p>
+
+    <div class="fotos-hist">
+      <!-- FOTO PRINCIPAL DEL LOCAL -->
+      <!-- Para activar: borrá el bloque .foto-h-ph y descomentá la línea <img> -->
+      <div class="foto-h">
+        <div class="foto-h-ph">
+          <span>🏠</span>
+          Foto del local<br><small>FOTO_LOCAL.jpg · 800×350px</small>
+        </div>
+        <!-- <img src="FOTO_LOCAL.jpg" alt="Local Lole Burger"/> -->
+        <div class="foto-h-label">El local — Santa Librada, Ñemby</div>
+      </div>
+
+      <!-- FOTO DE LA PARRILLA -->
+      <div class="foto-h">
+        <div class="foto-h-ph">
+          <span>🔥</span>
+          Foto de la parrilla<br><small>FOTO_PARRILLA.jpg</small>
+        </div>
+        <!-- <img src="FOTO_PARRILLA.jpg" alt="Parrilla Lole Burger"/> -->
+        <div class="foto-h-label">Cocinamos a la parrilla</div>
+      </div>
+
+      <!-- FOTO DEL EQUIPO -->
+      <div class="foto-h">
+        <div class="foto-h-ph">
+          <span>👨‍🍳</span>
+          Foto del equipo<br><small>FOTO_EQUIPO.jpg</small>
+        </div>
+        <!-- <img src="FOTO_EQUIPO.jpg" alt="Equipo Lole Burger"/> -->
+        <div class="foto-h-label">Nuestro equipo</div>
+      </div>
+    </div>
+
+    <div class="valores">
+      <div class="val"><div class="val-ico">🥩</div><div class="val-titulo">Carne fresca</div><div class="val-txt">Sin conservantes ni congelado, siempre del día.</div></div>
+      <div class="val"><div class="val-ico">🍞</div><div class="val-titulo">Pan artesanal</div><div class="val-txt">Buns suaves horneados por encargo cada día.</div></div>
+      <div class="val"><div class="val-ico">🧄</div><div class="val-titulo">Salsas propias</div><div class="val-txt">Recetas secretas que no encontrás en otro lado.</div></div>
+      <div class="val"><div class="val-ico">❤️</div><div class="val-titulo">Con amor</div><div class="val-txt">Cada pedido se hace como si fuera para la familia.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB CARRITO ══════════════ -->
+<div id="tab-carrito" class="seccion">
+  <div class="main">
+
+    <div class="ws-pill">
+      <div class="ws-dot" id="ws-dot"></div>
+      <span id="ws-label">Conectando...</span>
+    </div>
+
+    <!-- Confirmación post-pedido -->
+    <div class="confirma-box" id="confirma-box">
+      <div class="confirma-check">✅</div>
+      <div class="confirma-titulo">¡Pedido enviado!</div>
+      <div class="confirma-num" id="confirma-num">#001</div>
+      <div class="confirma-txt">Tu pedido ya está en cocina.<br>¡Lo están preparando!</div>
+      <button class="btn-nuevo" onclick="nuevoPedido()">Hacer otro pedido</button>
+    </div>
+
+    <!-- Carrito vacío -->
+    <div class="carrito-vacio" id="carrito-vacio">
+      <div class="ico">🛒</div>
+      <p>Todavía no elegiste nada.<br>Volvé al menú y seleccioná lo que querés.</p>
+      <button class="btn-ir-menu" onclick="irTab('menu')">👉 Ver el menú</button>
+    </div>
+
+    <!-- Items seleccionados -->
+    <div id="resumen-items" class="resumen-card" style="display:none"></div>
+
+    <!-- Formulario -->
+    <div id="form-pedido" style="display:none">
+      <div class="campo-grupo">
+        <label>¿Cuál es tu nombre o número de mesa? <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+        <input type="text" id="campo-mesa" placeholder="Ej: María · Mesa 2"/>
+      </div>
+      <div class="campo-grupo">
+        <label>¿Alguna aclaración? <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+        <textarea id="campo-nota" placeholder="Ej: Sin cebolla, bien cocida..."></textarea>
+      </div>
+      <button class="btn-pedir" id="btn-pedir" onclick="enviarPedido()">
+        🔥 Enviar pedido a cocina
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- BARRA FLOTANTE -->
+<div class="barra oculta" id="barra">
+  <div class="barra-info">
+    <div class="barra-count" id="barra-count">0 productos</div>
+    <div class="barra-total" id="barra-total" style="color:#fff">Gs. 0</div>
+  </div>
+  <button class="barra-btn" onclick="irTab('carrito')">Ver mi pedido →</button>
+</div>
+
+<script>
+const WS_IP   = "192.168.100.56"; // ← IP de tu PC
+const WS_PORT = 8765;
+
+const MENU = {
+  burgers:[
+    {id:"b1",nombre:"Completa",           desc:"Con todos los ingredientes de la casa",              precio:14000, emoji:"🍔", foto:"burger-completa.jpg"},
+    {id:"b2",nombre:"Con Cheddar",        desc:"Hamburguesa con queso cheddar fundido",              precio:17000, emoji:"🍔", foto:"burger-cheddar.jpg"},
+    {id:"b3",nombre:"Con Panceta",        desc:"Hamburguesa con panceta crocante",                   precio:17000, emoji:"🥩", foto:"burger-panceta.jpg"},
+    {id:"b4",nombre:"Doble",              desc:"Doble medallón de carne vacuna",                     precio:25000, emoji:"🏆", foto:"burger-doble.jpg", badge:"⭐ Top"},
+  ],
+  pizzas:[
+    {id:"p1", nombre:"Muzzarela",         desc:"Salsa de tomate y muzzarela",                        precio:25000, emoji:"🍕", foto:"pizza-muzzarela.jpg"},
+    {id:"p2", nombre:"Choclo",            desc:"Muzzarela con choclo",                               precio:30000, emoji:"🍕", foto:"pizza-choclo.jpg"},
+    {id:"p3", nombre:"Napolitana",        desc:"Muzzarela con tomate y ajo",                         precio:30000, emoji:"🍕", foto:"pizza-napolitana.jpg"},
+    {id:"p4", nombre:"Con Huevo",         desc:"Muzzarela con huevo",                                precio:30000, emoji:"🍕", foto:"pizza-huevo.jpg"},
+    {id:"p5", nombre:"Jamón",             desc:"Muzzarela con jamón",                                precio:30000, emoji:"🍕", foto:"pizza-jamon.jpg"},
+    {id:"p6", nombre:"Pepperoni",         desc:"Muzzarela con pepperoni",                            precio:35000, emoji:"🍕", foto:"pizza-pepperoni.jpg"},
+    {id:"p7", nombre:"Cebolla y Panceta", desc:"Muzzarela, cebolla caramelizada y panceta",          precio:35000, emoji:"🍕", foto:"pizza-panceta.jpg"},
+    {id:"p8", nombre:"Mexicana",          desc:"Muzzarela estilo mexicano",                          precio:35000, emoji:"🍕", foto:"pizza-mexicana.jpg"},
+    {id:"p9", nombre:"4 Quesos",          desc:"Cuatro quesos fundidos",                             precio:40000, emoji:"🍕", foto:"pizza-4queso.jpg"},
+    {id:"p10",nombre:"Lomito Catupiry",   desc:"Lomito con catupiry",                                precio:45000, emoji:"🍕", foto:"pizza-lomitocatu.jpg"},
+    {id:"p11",nombre:"Pollo Catupiry",    desc:"Pollo con catupiry",                                 precio:45000, emoji:"🍕", foto:"pizza-pollocatu.jpg"},
+    {id:"p12",nombre:"Lomipizza",         desc:"La pizza especial de la casa",                       precio:90000, emoji:"⭐", foto:"pizza-lomipizza.jpg", badge:"Especial"},
+  ],
+  lomito:[
+    {id:"l1",nombre:"Lomito Sandwich",    desc:"Carne de lomito en pan",                             precio:20000, emoji:"🥖", foto:"lomito-sandwich.jpg"},
+  ],
+  arabe:[
+    {id:"a1",nombre:"Árabe de Pollo",     desc:"Lomito árabe con pollo",                             precio:22000, emoji:"🌯", foto:"arabe-pollo.jpg"},
+    {id:"a2",nombre:"Árabe de Carne",     desc:"Lomito árabe con carne",                             precio:22000, emoji:"🌯", foto:"arabe-carne.jpg"},
+    {id:"a3",nombre:"Árabe Mixto",        desc:"Pollo y carne juntos",                               precio:22000, emoji:"🌯", foto:"arabe-mixto.jpg"},
+  ],
+  papas:[
+    {id:"pp1",nombre:"Normal",            desc:"Papas fritas clásicas",                              precio:10000, emoji:"🍟", foto:"papas-normal.jpg"},
+    {id:"pp2",nombre:"Con Cheddar",       desc:"Papas con salsa cheddar",                            precio:15000, emoji:"🧀", foto:"papas-cheddar.jpg"},
+    {id:"pp3",nombre:"Panceta y Cheddar", desc:"Papas con panceta y cheddar",                        precio:20000, emoji:"🥓", foto:"papas-panceta.jpg"},
+    {id:"pp4",nombre:"Grande Normal",     desc:"Porción grande de papas fritas",                     precio:20000, emoji:"🍟", foto:"papas-grande.jpg"},
+  ]
+};
+
+const carrito={};
+let ws=null,wsOk=false;
+
+function fmt(n){return"Gs. "+n.toLocaleString("es-PY")}
+
+function encontrar(id){
+  for(const g of Object.values(MENU)){const f=g.find(i=>i.id===id);if(f)return f;}
+}
+
+/* ── RENDER ITEMS ── */
+function renderCat(items,contenedorId){
+  const el=document.getElementById(contenedorId);
+  // Mantener aviso pizza si existe
+  const aviso=el.querySelector(".aviso-pizza");
+  const html=items.map(it=>`
+    <div class="item-row${carrito[it.id]?" en-carrito":""}" id="row-${it.id}">
+      ${it.badge?`<div class="item-badge">${it.badge}</div>`:""}
+      <div class="item-foto" id="foto-${it.id}">
+        <img src="${it.foto}" alt="${it.nombre}"
+          onerror="this.parentElement.innerHTML='<span style=\\"font-size:2rem\\">${it.emoji}</span>'"
+          loading="lazy"/>
+      </div>
+      <div class="item-info">
+        <div class="item-nombre">${it.nombre}</div>
+        <div class="item-desc">${it.desc}</div>
+        <div class="item-precio">${fmt(it.precio)}</div>
+        <div id="ctrl-${it.id}">${renderCtrl(it.id)}</div>
+      </div>
+    </div>`).join("");
+  el.innerHTML=(aviso?aviso.outerHTML:"")+html;
+}
+
+function renderCtrl(id){
+  const q=carrito[id]?.qty||0;
+  if(!q)return`<button class="btn-agregar" onclick="agregar('${id}')">＋ Agregar al pedido</button>`;
+  return`<div class="qty-ctrl">
+    <button class="qty-btn" onclick="cambiar('${id}',-1)">−</button>
+    <span class="qty-n">${q}</span>
+    <button class="qty-btn" onclick="cambiar('${id}',1)">＋</button>
+  </div>`;
+}
+
+function agregar(id){
+  carrito[id]={qty:1,item:encontrar(id)};
+  refrescar(id);actualizarBarra();renderResumen();
+}
+function cambiar(id,d){
+  if(!carrito[id])return;
+  carrito[id].qty+=d;
+  if(carrito[id].qty<=0)delete carrito[id];
+  refrescar(id);actualizarBarra();renderResumen();
+}
+function refrescar(id){
+  const ctrl=document.getElementById("ctrl-"+id);if(ctrl)ctrl.innerHTML=renderCtrl(id);
+  const row=document.getElementById("row-"+id);if(row)row.className="item-row"+(carrito[id]?" en-carrito":"");
+}
+
+function actualizarBarra(){
+  const ent=Object.values(carrito);
+  const n=ent.reduce((s,e)=>s+e.qty,0);
+  const t=ent.reduce((s,e)=>s+e.item.precio*e.qty,0);
+  const b=document.getElementById("barra");
+  if(n)b.classList.remove("oculta");else b.classList.add("oculta");
+  document.getElementById("barra-count").textContent=n+" producto"+(n!==1?"s":"");
+  document.getElementById("barra-total").textContent=fmt(t);
+}
+
+function renderResumen(){
+  const ent=Object.values(carrito);
+  const vacio=document.getElementById("carrito-vacio");
+  const items=document.getElementById("resumen-items");
+  const form=document.getElementById("form-pedido");
+  if(!ent.length){
+    vacio.style.display="";items.style.display="none";form.style.display="none";return;
+  }
+  vacio.style.display="none";items.style.display="";form.style.display="";
+  const total=ent.reduce((s,e)=>s+e.item.precio*e.qty,0);
+  items.innerHTML=ent.map(e=>`
+    <div class="res-fila">
+      <div class="res-ctrl">
+        <button class="res-qbtn" onclick="cambiar('${e.item.id}',-1)">−</button>
+        <span class="res-qn">${e.qty}</span>
+        <button class="res-qbtn" onclick="cambiar('${e.item.id}',1)">+</button>
+      </div>
+      <span class="res-nombre">${e.item.nombre}</span>
+      <span class="res-precio">${fmt(e.item.precio*e.qty)}</span>
+    </div>`).join("")+`
+    <div class="res-fila">
+      <span></span>
+      <span class="res-nombre" style="font-weight:700">Total</span>
+      <span class="res-total">${fmt(total)}</span>
+    </div>`;
+}
+
+/* ── WEBSOCKET ── */
+function conectarWS(){
+  try{
+    ws=new WebSocket(`ws://${WS_IP}:${WS_PORT}`);
+    ws.onopen=()=>{wsOk=true;ws.send(JSON.stringify({accion:"registrar",tipo:"menu"}));setDot(true)};
+    ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.accion==="confirmado")mostrarConfirmacion(m.numero)};
+    ws.onclose=()=>{wsOk=false;setDot(false);setTimeout(conectarWS,3000)};
+    ws.onerror=()=>{wsOk=false;setDot(false)};
+  }catch(e){setDot(false);setTimeout(conectarWS,5000)}
+}
+function setDot(ok){
+  const d=document.getElementById("ws-dot"),l=document.getElementById("ws-label");
+  d.className="ws-dot"+(ok?" ok":" err");
+  l.textContent=ok?"Conectado con la cocina ✓":"Sin conexión con el local";
+}
+
+function enviarPedido(){
+  const ent=Object.values(carrito);
+  if(!ent.length){mostrarToast("Agregá algo al pedido primero");return}
+  if(!wsOk){mostrarToast("Sin conexión. ¿Está corriendo el servidor?");return}
+  const total=ent.reduce((s,e)=>s+e.item.precio*e.qty,0);
+  ws.send(JSON.stringify({
+    accion:"pedido",
+    mesa:document.getElementById("campo-mesa").value.trim(),
+    nota:document.getElementById("campo-nota").value.trim(),
+    total,
+    items:ent.map(e=>({id:e.item.id,nombre:e.item.nombre,qty:e.qty,precio:e.item.precio}))
+  }));
+  document.getElementById("btn-pedir").disabled=true;
+  document.getElementById("btn-pedir").textContent="Enviando...";
+}
+
+function mostrarConfirmacion(num){
+  document.getElementById("confirma-num").textContent="#"+String(num).padStart(3,"0");
+  document.getElementById("confirma-box").classList.add("visible");
+  document.getElementById("resumen-items").style.display="none";
+  document.getElementById("form-pedido").style.display="none";
+  document.getElementById("carrito-vacio").style.display="none";
+}
+
+function nuevoPedido(){
+  Object.keys(carrito).forEach(k=>delete carrito[k]);
+  document.querySelectorAll(".item-row").forEach(r=>r.classList.remove("en-carrito"));
+  document.querySelectorAll("[id^='ctrl-']").forEach(c=>{
+    const id=c.id.replace("ctrl-","");c.innerHTML=renderCtrl(id);
+  });
+  document.getElementById("confirma-box").classList.remove("visible");
+  document.getElementById("campo-mesa").value="";
+  document.getElementById("campo-nota").value="";
+  document.getElementById("btn-pedir").disabled=false;
+  document.getElementById("btn-pedir").textContent="🔥 Enviar pedido a cocina";
+  actualizarBarra();renderResumen();
+  irTab("menu");
+}
+
+/* ── NAVEGACIÓN ── */
+function irTab(tab){
+  ["menu","historia","carrito"].forEach(t=>{
+    document.getElementById("tab-"+t).className="seccion"+(t===tab?" activa":"");
+  });
+  document.querySelectorAll(".tab-nav-btn").forEach((b,i)=>{
+    b.className="tab-nav-btn"+(["menu","historia","carrito"][i]===tab?" activa":"");
+  });
+  if(tab==="carrito")renderResumen();
+}
+
+let catActual="burgers";
+function irCat(cat,btn){
+  document.getElementById("cat-"+catActual).style.display="none";
+  document.getElementById("cat-"+cat).style.display="";
+  document.querySelectorAll(".cat-btn").forEach(b=>b.classList.remove("activa"));
+  btn.classList.add("activa");
+  catActual=cat;
+}
+
+function mostrarToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("visible");
+  setTimeout(()=>t.classList.remove("visible"),3000);
+}
+
+/* ── INIT ── */
+renderCat(MENU.burgers,"cat-burgers");
+// Para pizzas, renderizamos dentro del div pero mantenemos el aviso
+const pizzaContainer=document.getElementById("cat-pizzas");
+const avisoPizza=pizzaContainer.querySelector(".aviso-pizza").outerHTML;
+pizzaContainer.innerHTML=avisoPizza+MENU.pizzas.map(it=>`
+  <div class="item-row${carrito[it.id]?" en-carrito":""}" id="row-${it.id}">
+    ${it.badge?`<div class="item-badge">${it.badge}</div>`:""}
+    <div class="item-foto" id="foto-${it.id}">
+      <img src="${it.foto}" alt="${it.nombre}"
+        onerror="this.parentElement.innerHTML='<span style=\\"font-size:2rem\\">${it.emoji}</span>'"
+        loading="lazy"/>
+    </div>
+    <div class="item-info">
+      <div class="item-nombre">${it.nombre}</div>
+      <div class="item-desc">${it.desc}</div>
+      <div class="item-precio">${fmt(it.precio)}</div>
+      <div id="ctrl-${it.id}">${renderCtrl(it.id)}</div>
+    </div>
+  </div>`).join("");
+renderCat(MENU.lomito,"cat-lomito");
+renderCat(MENU.arabe,"cat-arabe");
+renderCat(MENU.papas,"cat-papas");
+actualizarBarra();
+conectarWS();
+</script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+# 🍔 Lole Burger — Sistema de pedidos
+
+## Archivos incluidos
+
+| Archivo        | Para quién            | Descripción                          |
+|----------------|-----------------------|--------------------------------------|
+| `menu.html`    | Clientes (celular)    | Menú interactivo con pedidos         |
+| `cocina.html`  | Cocineros (TV/PS)     | Pantalla de tickets en tiempo real   |
+| `servidor.py`  | PC del local          | Conecta todo por WiFi                |
+
+---
+
+## ▶ Cómo iniciar (paso a paso)
+
+### 1. Instalá Python (solo la primera vez)
+Descargá desde https://python.org/downloads  
+(marcá "Add to PATH" al instalar en Windows)
+
+### 2. Instalá la dependencia (solo la primera vez)
+Abrí la terminal y escribí:
+```
+pip install websockets
+```
+
+### 3. Corré el servidor
+En la misma carpeta donde están los archivos, escribí:
+```
+python servidor.py
+```
+Vas a ver algo así:
+```
+  IP local:  192.168.1.105
+  Puerto:    8765
+  Esperando conexiones...
+```
+
+### 4. Abrí la pantalla de cocina en la TV
+En el navegador de la Smart TV o PS4/PS5, entrá a:
+```
+http://192.168.1.105/cocina.html
+```
+(reemplazá la IP con la que aparece en la consola)
+
+**Alternativa fácil:** Conectá la PC/laptop a la TV por HDMI y abrí
+`cocina.html` en el navegador de la PC.
+
+### 5. Clientes piden desde el celular
+Todos los que estén en el mismo WiFi pueden abrir:
+```
+http://192.168.1.105/menu.html
+```
+O si tenés un QR en la mesa, escanearlo directamente.
+
+---
+
+## 📸 Cómo agregar fotos
+
+### Foto del hero (banner principal del menú)
+- Reemplazá el archivo `TU_FOTO_HERO.jpg` con tu foto
+- En `menu.html`, descomentá la línea del `<img>` en el hero
+
+### Fotos de los productos
+Creá fotos con estos nombres exactos (o cambiá los nombres en el código):
+```
+burger-classic.jpg     burger-doble.jpg      burger-bbq.jpg
+burger-chicken.jpg     burger-veggie.jpg     burger-especial.jpg
+combo-classic.jpg      combo-doble.jpg       combo-bbq.jpg
+combo-familiar.jpg     papas.jpg             papas-cheddar.jpg
+aros.jpg               coca.jpg              agua.jpg     bacon.jpg
+```
+Tamaño ideal: **400×300 px** (4:3). Ponelos en la misma carpeta.
+
+### Fotos de la historia
+```
+FOTO_LOCAL.jpg       → foto del local / entrada (800×350 px ideal)
+FOTO_PARRILLA.jpg    → foto de la parrilla o proceso (cuadrada)
+FOTO_EQUIPO.jpg      → foto del equipo o dueños (cuadrada)
+```
+En `menu.html`, buscá los comentarios `<!-- Descomentá cuando tengas la foto -->` y sacá los `<!-- -->`.
+
+---
+
+## 📱 WhatsApp (opcional, como respaldo)
+En `menu.html`, buscá la función `sendWhatsapp()` y cambiá:
+```
+595XXXXXXXXX  →  tu número real (ej: 595981234567)
+```
+
+---
+
+## 🔧 Cambiar precios o productos
+En `menu.html`, buscá el objeto `const MENU = {` y editá los valores:
+```javascript
+{id:"b1", nombre:"Lole Classic", desc:"...", precio:35000, ...}
+```
+
+---
+
+## ❓ Problemas comunes
+
+**"No conecta"** → Verificá que todos los dispositivos estén en el mismo WiFi.
+
+**"La IP no detecta"** → En `menu.html` y `cocina.html`, buscá `const WS_IP` y escribí la IP manualmente.
+
+**"No suena en la cocina"** → El navegador necesita que toques la pantalla al menos una vez antes de permitir sonido. Tocá en cualquier parte de `cocina.html`.
+
+**La TV no tiene navegador moderno** → Conectá una PC/laptop a la TV por HDMI y usá Chrome o Firefox.

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Lole Burger — Cocina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --negro:#0a0a0a;
+  --carbon:#111;
+  --card:#1a1a1a;
+  --card2:#222;
+  --naranja:#e85d00;
+  --naranja2:#ff7520;
+  --verde:#22c55e;
+  --amarillo:#facc15;
+  --rojo:#ef4444;
+  --texto:#f5f5f5;
+  --muted:#888;
+  --borde:rgba(255,255,255,0.08);
+}
+
+html,body{height:100%;width:100%}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--negro);
+  color:var(--texto);
+  overflow-x:hidden;
+}
+
+/* ── HEADER ─────────────────────────── */
+header{
+  background:var(--carbon);
+  border-bottom:1px solid var(--borde);
+  padding:0 1.5rem;
+  height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+}
+.h-logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#fff;letter-spacing:1px}
+.h-logo span{color:var(--naranja)}
+.h-right{display:flex;align-items:center;gap:1.5rem}
+.h-hora{font-size:1.5rem;font-weight:700;font-family:'Bebas Neue',sans-serif;color:var(--naranja);letter-spacing:1px}
+.ws-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,0.06);
+  padding:5px 12px;border-radius:20px;
+  font-size:12px;color:var(--muted);
+}
+.ws-dot{width:8px;height:8px;border-radius:50%;background:#555;flex-shrink:0}
+.ws-dot.ok{background:var(--verde);box-shadow:0 0 6px var(--verde)}
+.ws-dot.err{background:var(--rojo)}
+
+/* ── STATS BAR ──────────────────────── */
+.stats{
+  display:flex;gap:12px;padding:1rem 1.5rem;
+  border-bottom:1px solid var(--borde);
+  background:var(--carbon);
+}
+.stat{
+  background:var(--card);
+  border:1px solid var(--borde);
+  border-radius:8px;
+  padding:10px 18px;
+  text-align:center;min-width:90px;
+}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:var(--naranja)}
+.stat-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-top:2px}
+
+/* ── MAIN GRID ──────────────────────── */
+.tablero{
+  padding:1.25rem 1.5rem;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:14px;
+  align-content:start;
+}
+
+/* ── TICKET ─────────────────────────── */
+.ticket{
+  background:var(--card);
+  border:1px solid var(--borde);
+  border-radius:12px;
+  overflow:hidden;
+  transition:all 0.3s;
+  animation:slideIn 0.35s ease;
+}
+@keyframes slideIn{
+  from{opacity:0;transform:translateY(-16px) scale(0.97)}
+  to  {opacity:1;transform:translateY(0) scale(1)}
+}
+.ticket.nuevo{border-color:var(--naranja);box-shadow:0 0 0 1px var(--naranja), 0 0 20px rgba(232,93,0,0.25)}
+.ticket.listo{border-color:var(--verde);opacity:0.5}
+
+.ticket-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;
+  background:rgba(255,255,255,0.03);
+  border-bottom:1px solid var(--borde);
+}
+.ticket-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:2rem;color:#fff;line-height:1;
+}
+.ticket-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.ticket-hora{font-size:12px;color:var(--muted)}
+
+.badge-nuevo{
+  background:var(--naranja);color:#fff;
+  font-size:11px;font-weight:700;
+  padding:3px 10px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:0.05em;
+  animation:pulso 1s ease infinite;
+}
+@keyframes pulso{0%,100%{opacity:1}50%{opacity:0.6}}
+.badge-listo-ok{
+  background:rgba(34,197,94,0.15);color:var(--verde);
+  border:1px solid rgba(34,197,94,0.35);
+  font-size:11px;font-weight:700;
+  padding:3px 10px;border-radius:20px;
+}
+
+.ticket-items{padding:12px 16px;border-bottom:1px solid var(--borde)}
+.ticket-item{
+  display:flex;align-items:baseline;gap:8px;
+  padding:5px 0;
+  font-size:0.95rem;
+}
+.ticket-item:not(:last-child){border-bottom:1px solid rgba(255,255,255,0.04)}
+.item-qty{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.4rem;color:var(--naranja);
+  min-width:24px;line-height:1;
+}
+.item-nombre{color:var(--texto);font-weight:500}
+
+.ticket-nota{
+  margin:0 16px 10px;
+  background:rgba(250,204,21,0.08);
+  border:1px solid rgba(250,204,21,0.2);
+  border-radius:6px;
+  padding:7px 10px;
+  font-size:12px;
+  color:var(--amarillo);
+}
+.ticket-nota::before{content:"📝 ";}
+
+.ticket-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;
+}
+.ticket-tiempo{font-size:12px;color:var(--muted)}
+.ticket-tiempo.urgente{color:var(--rojo);font-weight:600}
+
+.btn-listo{
+  background:var(--verde);color:#fff;
+  border:none;padding:8px 18px;border-radius:20px;
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all 0.15s;
+  display:flex;align-items:center;gap:6px;
+}
+.btn-listo:hover{background:#16a34a;transform:scale(1.03)}
+.btn-listo.ya-listo{background:rgba(34,197,94,0.15);color:var(--verde);cursor:default;transform:none}
+
+/* ── VACÍO ──────────────────────────── */
+.vacio{
+  grid-column:1/-1;
+  text-align:center;padding:5rem 1rem;
+  color:var(--muted);
+}
+.vacio-icono{font-size:4rem;margin-bottom:1rem;opacity:0.3}
+.vacio-txt{font-size:1rem}
+
+/* ── ALERTA FLASH ───────────────────── */
+.flash{
+  position:fixed;inset:0;
+  background:rgba(232,93,0,0.15);
+  pointer-events:none;
+  opacity:0;transition:opacity 0.1s;
+  z-index:999;
+}
+.flash.activo{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="flash" id="flash"></div>
+
+<header>
+  <div class="h-logo">Lole<span>Burger</span> <span style="color:var(--muted);font-size:1rem;letter-spacing:0">·</span> <span style="color:var(--muted);font-size:1.2rem">COCINA</span></div>
+  <div class="h-right">
+    <div class="ws-pill">
+      <div class="ws-dot" id="wsdot"></div>
+      <span id="wslabel">Conectando...</span>
+    </div>
+    <div class="h-hora" id="reloj">00:00</div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n" id="stat-pend">0</div><div class="stat-l">Pendientes</div></div>
+  <div class="stat"><div class="stat-n" id="stat-listos">0</div><div class="stat-l">Listos hoy</div></div>
+  <div class="stat"><div class="stat-n" id="stat-total">0</div><div class="stat-l">Total del día</div></div>
+</div>
+
+<div class="tablero" id="tablero">
+  <div class="vacio" id="vacio">
+    <div class="vacio-icono">🍔</div>
+    <p class="vacio-txt">Sin pedidos pendientes.<br>Esperando órdenes...</p>
+  </div>
+</div>
+
+<script>
+/* ═══ CONFIGURACIÓN ══════════════════════════════
+   Si no funciona automático, poné la IP de la PC
+   que corre servidor.py:
+   const WS_IP = "192.168.1.XXX";
+   ════════════════════════════════════════════════ */
+const WS_IP   = "192.168.100.56";
+const WS_PORT = 8765;
+
+let ws = null;
+let contPend = 0, contListos = 0, contTotal = 0;
+const pedidos = {}; // id → {datos, listo, ts}
+
+/* ═══ RELOJ ══════════════════════════════════════ */
+function tickReloj(){
+  const now = new Date();
+  document.getElementById("reloj").textContent =
+    String(now.getHours()).padStart(2,"0")+":"+String(now.getMinutes()).padStart(2,"0");
+  actualizarTiempos();
+}
+setInterval(tickReloj,1000); tickReloj();
+
+/* ═══ WEBSOCKET ══════════════════════════════════ */
+function conectar(){
+  try{
+    ws = new WebSocket(`ws://${WS_IP}:${WS_PORT}`);
+    ws.onopen = ()=>{
+      ws.send(JSON.stringify({accion:"registrar",tipo:"cocina"}));
+      setDot(true);
+    };
+    ws.onmessage = e=>{
+      const msg = JSON.parse(e.data);
+      if(msg.accion==="nuevo_pedido") recibirPedido(msg);
+    };
+    ws.onclose = ()=>{ setDot(false); setTimeout(conectar,3000); };
+    ws.onerror = ()=>{ setDot(false); };
+  }catch(e){ setDot(false); setTimeout(conectar,5000); }
+}
+
+function setDot(ok){
+  const d=document.getElementById("wsdot"), l=document.getElementById("wslabel");
+  d.className="ws-dot"+(ok?" ok":" err");
+  l.textContent=ok?"Conectado":"Sin conexión — reintentando...";
+}
+
+/* ═══ SONIDO ALERTA ══════════════════════════════ */
+function sonar(){
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const toques = [880, 1100, 880, 1320];
+    toques.forEach((freq,i)=>{
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = "sine";
+      gain.gain.setValueAtTime(0,ctx.currentTime+i*0.12);
+      gain.gain.linearRampToValueAtTime(0.4,ctx.currentTime+i*0.12+0.02);
+      gain.gain.linearRampToValueAtTime(0,ctx.currentTime+i*0.12+0.1);
+      osc.start(ctx.currentTime+i*0.12);
+      osc.stop(ctx.currentTime+i*0.12+0.12);
+    });
+  }catch(e){}
+}
+
+function flashPantalla(){
+  const f=document.getElementById("flash");
+  f.classList.add("activo");
+  setTimeout(()=>f.classList.remove("activo"),400);
+}
+
+/* ═══ RECIBIR PEDIDO ═════════════════════════════ */
+function recibirPedido(msg){
+  pedidos[msg.numero] = {datos:msg, listo:false, ts:Date.now()};
+  contTotal++;
+  contPend++;
+  actualizarStats();
+  renderTickets();
+  sonar();
+  flashPantalla();
+  // Parpadear título para notificar
+  let parpadeos=0;
+  const orig = document.title;
+  const iv = setInterval(()=>{
+    document.title = parpadeos%2===0 ? `🔔 PEDIDO #${String(msg.numero).padStart(3,"0")}` : orig;
+    if(++parpadeos>8){ clearInterval(iv); document.title=orig; }
+  },500);
+}
+
+function marcarListo(num){
+  if(!pedidos[num] || pedidos[num].listo) return;
+  pedidos[num].listo = true;
+  contPend = Math.max(0,contPend-1);
+  contListos++;
+  contTotal++;
+  actualizarStats();
+  if(ws && ws.readyState===WebSocket.OPEN)
+    ws.send(JSON.stringify({accion:"listo",numero:num}));
+  renderTickets();
+  setTimeout(()=>{ delete pedidos[num]; renderTickets(); },8000);
+}
+
+/* ═══ STATS ══════════════════════════════════════ */
+function actualizarStats(){
+  document.getElementById("stat-pend").textContent = contPend;
+  document.getElementById("stat-listos").textContent = contListos;
+  document.getElementById("stat-total").textContent = contTotal;
+}
+
+/* ═══ TIEMPO TRANSCURRIDO ════════════════════════ */
+function elapsed(ts){
+  const seg = Math.floor((Date.now()-ts)/1000);
+  if(seg<60) return seg+"s";
+  return Math.floor(seg/60)+"m "+String(seg%60).padStart(2,"0")+"s";
+}
+
+function actualizarTiempos(){
+  Object.keys(pedidos).forEach(num=>{
+    const el=document.getElementById("tiempo-"+num);
+    if(!el) return;
+    const seg=Math.floor((Date.now()-pedidos[num].ts)/1000);
+    el.textContent="⏱ "+elapsed(pedidos[num].ts);
+    el.className="ticket-tiempo"+(seg>300?" urgente":"");
+  });
+}
+
+/* ═══ RENDER ═════════════════════════════════════ */
+function renderTickets(){
+  const tablero = document.getElementById("tablero");
+  const vacio = document.getElementById("vacio");
+  const nums = Object.keys(pedidos).map(Number).sort((a,b)=>a-b);
+
+  if(!nums.length){
+    tablero.innerHTML="";
+    tablero.appendChild(vacio);
+    return;
+  }
+  vacio.remove();
+
+  // Actualizar o crear tickets
+  nums.forEach(num=>{
+    const p=pedidos[num];
+    const existe=document.getElementById("ticket-"+num);
+    if(!existe){
+      const el=document.createElement("div");
+      el.id="ticket-"+num;
+      el.innerHTML=htmlTicket(p.datos, p.listo);
+      tablero.prepend(el);
+    } else {
+      // Actualizar estado listo/pendiente sin re-crear
+      if(p.listo){
+        existe.querySelector(".ticket").className="ticket listo";
+        const badge=existe.querySelector(".badge-nuevo");
+        if(badge) badge.outerHTML=`<span class="badge-listo-ok">✓ Listo</span>`;
+        const btn=existe.querySelector(".btn-listo");
+        if(btn){ btn.textContent="✓ Listo"; btn.className="btn-listo ya-listo"; btn.onclick=null; }
+      }
+    }
+  });
+
+  // Eliminar tickets que ya no están
+  document.querySelectorAll("[id^='ticket-']").forEach(el=>{
+    const n=Number(el.id.replace("ticket-",""));
+    if(!pedidos[n]) el.remove();
+  });
+}
+
+function htmlTicket(d, listo){
+  const mesa = d.mesa ? `<div class="ticket-meta">📍 ${d.mesa}</div>` : "";
+  const nota = d.nota ? `<div class="ticket-nota">${d.nota}</div>` : "";
+  const badge = listo
+    ? `<span class="badge-listo-ok">✓ Listo</span><div style="text-align:center;font-family:'Bebas Neue',sans-serif;font-size:3rem;color:#ef4444;letter-spacing:4px;padding:6px 0;border-bottom:1px solid rgba(239,68,68,0.3)">LISTO</div>`
+    : `<span class="badge-nuevo">Nuevo</span>`;
+  const btn = listo
+    ? `<button class="btn-listo ya-listo">✓ Listo</button>`
+    : `<button class="btn-listo" onclick="marcarListo(${d.numero})">✔ Marcar listo</button>`;
+
+  return `<div class="ticket${listo?" listo":" nuevo"}">
+    <div class="ticket-header">
+      <div>
+        <div class="ticket-num">#${String(d.numero).padStart(3,"0")}</div>
+        ${mesa}
+      </div>
+      <div style="text-align:right">
+        ${badge}
+        <div class="ticket-hora">${d.hora}</div>
+      </div>
+    </div>
+    <div class="ticket-items">
+      ${d.items.map(it=>`
+        <div class="ticket-item">
+          <span class="item-qty">${it.qty}</span>
+          <span class="item-nombre">${it.nombre}</span>
+        </div>`).join("")}
+    </div>
+    ${nota}
+    <div class="ticket-footer">
+      <span class="ticket-tiempo" id="tiempo-${d.numero}">⏱ 0s</span>
+      ${btn}
+    </div>
+  </div>`;
+}
+
+/* ═══ INIT ═══════════════════════════════════════ */
+conectar();
+
+/* Demo: descomentá para probar sin servidor
+setTimeout(()=>recibirPedido({
+  accion:"nuevo_pedido",numero:1,hora:"20:15",
+  mesa:"Mesa 2",nota:"Sin cebolla",
+  items:[{id:"b1",nombre:"Lole Classic",qty:2,precio:35000},{id:"e1",nombre:"Papas fritas",qty:1,precio:15000}],
+  total:85000
+}),2000);
+*/
+</script>
+</body>
+</html>
