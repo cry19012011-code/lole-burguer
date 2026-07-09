@@ -215,18 +215,8 @@ header{
 </div>
 
 <script>
-/* ═══ CONFIGURACIÓN ══════════════════════════════
-   Si no funciona automático, poné la IP de la PC
-   que corre servidor.py:
-   const WS_IP = "192.168.1.XXX";
-   ════════════════════════════════════════════════ */
-const WS_IP = "web-production-4cb14e.up.railway.app";
-const WS_PORT = 443;
-const WS_PROTOCOL = "wss";
-
-let ws = null;
 let contPend = 0, contListos = 0, contTotal = 0;
-const pedidos = {}; // id → {datos, listo, ts}
+const pedidos = {};
 
 /* ═══ RELOJ ══════════════════════════════════════ */
 function tickReloj(){
@@ -237,21 +227,17 @@ function tickReloj(){
 }
 setInterval(tickReloj,1000); tickReloj();
 
-/* ═══ WEBSOCKET ══════════════════════════════════ */
+/* ═══ ABLY ═══════════════════════════════════════ */
+const ABLY_KEY = "cZ8U3w.YMfK0A:VX18p9G06FQ1bgAMpz3UlvQcMGLlJyd5zu4PjfbXWwA";
+let canal = null;
+
 function conectar(){
-  try{
-    ws = new WebSocket(`wss://${WS_IP}`);
-    ws.onopen = ()=>{
-      ws.send(JSON.stringify({accion:"registrar",tipo:"cocina"}));
-      setDot(true);
-    };
-    ws.onmessage = e=>{
-      const msg = JSON.parse(e.data);
-      if(msg.accion==="nuevo_pedido") recibirPedido(msg);
-    };
-    ws.onclose = ()=>{ setDot(false); setTimeout(conectar,3000); };
-    ws.onerror = ()=>{ setDot(false); };
-  }catch(e){ setDot(false); setTimeout(conectar,5000); }
+  var ably = new Ably.Realtime(ABLY_KEY);
+  canal = ably.channels.get("lole-burger");
+  ably.connection.on("connected", function(){ setDot(true); });
+  ably.connection.on("disconnected", function(){ setDot(false); });
+  ably.connection.on("failed", function(){ setDot(false); });
+  canal.subscribe("pedido", function(msg){ recibirPedido(msg.data); });
 }
 
 function setDot(ok){
@@ -309,11 +295,10 @@ function marcarListo(num){
   pedidos[num].listo = true;
   contPend = Math.max(0,contPend-1);
   contListos++;
-  contTotal++;
   actualizarStats();
-  if(ws && ws.readyState===WebSocket.OPEN)
-    ws.send(JSON.stringify({accion:"listo",numero:num}));
+  if(canal) canal.publish("listo", {numero:num});
   renderTickets();
+  // Eliminar después de 8 segundos
   setTimeout(()=>{ delete pedidos[num]; renderTickets(); },8000);
 }
 
@@ -386,7 +371,7 @@ function htmlTicket(d, listo){
   const mesa = d.mesa ? `<div class="ticket-meta">📍 ${d.mesa}</div>` : "";
   const nota = d.nota ? `<div class="ticket-nota">${d.nota}</div>` : "";
   const badge = listo
-    ? `<span class="badge-listo-ok">✓ Listo</span><div style="text-align:center;font-family:'Bebas Neue',sans-serif;font-size:3rem;color:#ef4444;letter-spacing:4px;padding:6px 0;border-bottom:1px solid rgba(239,68,68,0.3)">LISTO</div>`
+    ? `<span class="badge-listo-ok">✓ Listo</span>`
     : `<span class="badge-nuevo">Nuevo</span>`;
   const btn = listo
     ? `<button class="btn-listo ya-listo">✓ Listo</button>`
@@ -421,14 +406,8 @@ function htmlTicket(d, listo){
 /* ═══ INIT ═══════════════════════════════════════ */
 conectar();
 
-/* Demo: descomentá para probar sin servidor
-setTimeout(()=>recibirPedido({
-  accion:"nuevo_pedido",numero:1,hora:"20:15",
-  mesa:"Mesa 2",nota:"Sin cebolla",
-  items:[{id:"b1",nombre:"Lole Classic",qty:2,precio:35000},{id:"e1",nombre:"Papas fritas",qty:1,precio:15000}],
-  total:85000
-}),2000);
-*/
+conectar();
 </script>
+<script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
 </body>
 </html>

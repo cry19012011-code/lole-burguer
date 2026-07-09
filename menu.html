@@ -486,9 +486,8 @@ body{font-family:'Inter',sans-serif;background:var(--crema);color:var(--texto);m
 </div>
 
 <script>
-const WS_IP = "web-production-4cb14e.up.railway.app";
-const WS_PORT = 443;
-const WS_PROTOCOL = "wss";
+const WS_IP   = "192.168.100.56"; // ← IP de tu PC
+const WS_PORT = 8765;
 
 const MENU = {
   burgers:[
@@ -527,8 +526,11 @@ const MENU = {
   ]
 };
 
+const ABLY_KEY = "cZ8U3w.YMfK0A:VX18p9G06FQ1bgAMpz3UlvQcMGLlJyd5zu4PjfbXWwA";
 const carrito={};
-let ws=null,wsOk=false;
+let ablyOk=false;
+let canal=null;
+let contadorPedido=0;
 
 function fmt(n){return"Gs. "+n.toLocaleString("es-PY")}
 
@@ -599,36 +601,43 @@ function renderResumen(){
   items.innerHTML=filas+'<div class="res-fila"><span></span><span class="res-nombre" style="font-weight:700">Total</span><span class="res-total">'+fmt(total)+'</span></div>';
 }
 
-/* ── WEBSOCKET ── */
-function conectarWS(){
-  try{
-    ws = new WebSocket(`wss://${WS_IP}`);
-    ws.onopen=()=>{wsOk=true;ws.send(JSON.stringify({accion:"registrar",tipo:"menu"}));setDot(true)};
-    ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.accion==="confirmado")mostrarConfirmacion(m.numero)};
-    ws.onclose=()=>{wsOk=false;setDot(false);setTimeout(conectarWS,3000)};
-    ws.onerror=()=>{wsOk=false;setDot(false)};
-  }catch(e){setDot(false);setTimeout(conectarWS,5000)}
+/* ── ABLY ── */
+function conectarAbly(){
+  var ably = new Ably.Realtime(ABLY_KEY);
+  canal = ably.channels.get("lole-burger");
+  ably.connection.on("connected", function(){
+    ablyOk=true; setDot(true);
+  });
+  ably.connection.on("disconnected", function(){ ablyOk=false; setDot(false); });
+  ably.connection.on("failed",      function(){ ablyOk=false; setDot(false); });
+  canal.subscribe("confirmado", function(msg){
+    mostrarConfirmacion(msg.data.numero);
+  });
 }
 function setDot(ok){
-  const d=document.getElementById("ws-dot"),l=document.getElementById("ws-label");
+  var d=document.getElementById("ws-dot"),l=document.getElementById("ws-label");
   d.className="ws-dot"+(ok?" ok":" err");
   l.textContent=ok?"Conectado con la cocina ✓":"Sin conexión con el local";
 }
 
 function enviarPedido(){
-  const ent=Object.values(carrito);
+  var ent=Object.values(carrito);
   if(!ent.length){mostrarToast("Agregá algo al pedido primero");return}
-  if(!wsOk){mostrarToast("Sin conexión. ¿Está corriendo el servidor?");return}
-  const total=ent.reduce((s,e)=>s+e.item.precio*e.qty,0);
-  ws.send(JSON.stringify({
-    accion:"pedido",
+  if(!ablyOk){mostrarToast("Sin conexión. Revisá el internet.");return}
+  var total=ent.reduce(function(s,e){return s+e.item.precio*e.qty},0);
+  contadorPedido++;
+  var numero=contadorPedido;
+  canal.publish("pedido",{
+    numero:numero,
+    hora:new Date().toLocaleTimeString("es-PY",{hour:"2-digit",minute:"2-digit"}),
     mesa:document.getElementById("campo-mesa").value.trim(),
     nota:document.getElementById("campo-nota").value.trim(),
-    total,
-    items:ent.map(e=>({id:e.item.id,nombre:e.item.nombre,qty:e.qty,precio:e.item.precio}))
-  }));
+    total:total,
+    items:ent.map(function(e){return{id:e.item.id,nombre:e.item.nombre,qty:e.qty,precio:e.item.precio}})
+  });
   document.getElementById("btn-pedir").disabled=true;
   document.getElementById("btn-pedir").textContent="Enviando...";
+  setTimeout(function(){ mostrarConfirmacion(numero); }, 800);
 }
 
 function mostrarConfirmacion(num){
@@ -687,7 +696,8 @@ renderCat(MENU.lomito,"cat-lomito");
 renderCat(MENU.arabe,"cat-arabe");
 renderCat(MENU.papas,"cat-papas");
 actualizarBarra();
-conectarWS();
+conectarAbly();
 </script>
+<script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
 </body>
 </html>
